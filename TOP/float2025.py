@@ -7,12 +7,11 @@ from time import sleep,time
 from math import dist,atan2,degrees,radians,sin,cos,dist
 import PyxelUniversalFont as puf
 from PIL import Image, ImageFile
-readFromsSerial = 0
-useolddataformat = 1
+readFromsSerial = 1
+useolddataformat = 0
 xbee = 0
 so=6
-tnum = 10
-batnum = 90
+tnum = 18
 starttime = time()
 def lerp(pos1,pos2, t):
 	x1 = pos1[0]
@@ -36,51 +35,29 @@ def tline(ps1,ps2,th,col):
 	pyxel.circ(ps1[0],ps1[1],th,col)
 	pyxel.circ(ps2[0],ps2[1],th,col)
 def CatmullRomSpline(P0, P1, P2, P3, a, nPoints=30):
-	"""
-	P0, P1, P2, and P3 should be (x,y) point pairs that define the Catmull-Rom spline.
-	nPoints is the number of points to include in this curve segment.
-	"""
-	# Convert the points to numpy so that we can do array multiplication
 	P0, P1, P2, P3 = map(numpy.array, [P0, P1, P2, P3])
-
-	# Calculate t0 to t4
 	alpha = a
 	def tj(ti, Pi, Pj):
 		xi, yi = Pi
 		xj, yj = Pj
 		return ( ( (xj-xi)**2 + (yj-yi)**2 )**0.5 )**alpha + ti
-
 	t0 = 0
 	t1 = tj(t0, P0, P1)
 	t2 = tj(t1, P1, P2)
 	t3 = tj(t2, P2, P3)
-
-	# Only calculate points between P1 and P2
 	t = numpy.linspace(t1,t2,nPoints)
-
-	# Reshape so that we can multiply by the points P0 to P3
-	# and get a point for each value of t.
 	t = t.reshape(len(t),1)
-
 	A1 = (t1-t)/(t1-t0)*P0 + (t-t0)/(t1-t0)*P1
 	A2 = (t2-t)/(t2-t1)*P1 + (t-t1)/(t2-t1)*P2
 	A3 = (t3-t)/(t3-t2)*P2 + (t-t2)/(t3-t2)*P3
-
 	B1 = (t2-t)/(t2-t0)*A1 + (t-t0)/(t2-t0)*A2
 	B2 = (t3-t)/(t3-t1)*A2 + (t-t1)/(t3-t1)*A3
-
 	C	= (t2-t)/(t2-t1)*B1 + (t-t1)/(t2-t1)*B2
 	return C
-
 def CatmullRomChain(P:list,alpha,rang):
-	
-	""" P.insert(0,[P[0][0]-P[1][0],P[0][1]-P[1][1]])
-	P.append([P[-1][0]-P[-2][0],P[-1][1]-P[-2][1]])"""
 	P.insert(0,P[0])
 	P.append(P[-1])
 	sz = len(P)
-
-	# The curve C will contain an array of (x,y) points.
 	C = []
 	for i in range(sz-3):
 		c = CatmullRomSpline(P[i], P[i+1], P[i+2], P[i+3],alpha)
@@ -88,7 +65,6 @@ def CatmullRomChain(P:list,alpha,rang):
 		ç=[]
 		for cç in C:
 			ç.append([cç[0],clamp(cç[1],low(rang),high(rang))])
-
 	return ç
 if readFromsSerial==0:
 	txt = open("txt.txt")
@@ -112,10 +88,11 @@ def low(list):
 			lo = l
 	return(lo)
 def conv(num,ç):
+
 	if ç ==0: 
-		return((num))
-		#return((num)/(9.81*996.25))
+		return((num*1000)/(9.81*996.25))
 	else:
+		
 		return(num)
 #load image resourses 
 if True:
@@ -174,7 +151,7 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		self.usepr = 0
 		self.store = []
 		self.ß=0
-		self.issmooth = 1
+		self.issmooth = 0
 		self.points = []
 		self.starttime = starttime
 		self.nextFrameIsFreeze=0
@@ -183,11 +160,18 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		points = []
 		global newdata
 		def newdata():
+			log=open("log.txt","w")
+			log.write("")
+			log.close()
+			log=open("log.txt","a")
 			ts.clear()
 			ds.clear()
 			if useolddataformat == 1:
 				while True:
+					log=open("log.txt","a")
 					chrs = str(ser.readline().decode(encoding="utf-8")).replace('\n',"")
+					log.write(chrs)
+					log.close()
 					if "end" in chrs:
 						break
 					elif "d" in chrs:
@@ -198,13 +182,14 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				while True:
 					chrs = str(ser.readline().decode(encoding="utf-8")).replace('\n',"").replace("\r","")
 					print(chrs)
+					log.write(chrs)
+					log.close()
 					#ds.append(float(chrs.replace("d","")))
 					if "end" in chrs:
 						break
-					elif "  " in chrs:
-						colontime = chrs.split("  ")[1].split(":")
-						ts.append(float(colontime[0])*3600+(float(colontime[1]))*60+(float(colontime[2])))
-						ds.append(float(chrs.split("  ")[2].replace("d","")))
+					elif " " in chrs:
+						ts.append(float(chrs.split("  ")[2].replace("t","")))
+						ds.append(float(chrs.split("  ")[1].replace("d","")))
 			points.clear()
 			self.points.clear()
 			for p in range(len(ts)):
