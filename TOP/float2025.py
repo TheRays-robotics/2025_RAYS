@@ -1,4 +1,4 @@
-import pyxel	
+import pyxel	  
 import serial
 import numpy
 import re
@@ -7,9 +7,9 @@ from time import sleep,time
 from math import dist,atan2,degrees,radians,sin,cos,dist
 import PyxelUniversalFont as puf
 from PIL import Image, ImageFile
-readFromsSerial = 1
-useolddataformat = 0
-xbee = 0
+readFromsSerial = 0
+useolddataformat = 1
+xbee = 1
 so=6
 tnum = 18
 starttime = time()
@@ -87,13 +87,16 @@ def low(list):
 		if l < lo:
 			lo = l
 	return(lo)
+
 def conv(num,ç):
 
-	if ç ==0: 
-		return((num*1000)/(9.81*996.25))
+	if ç == 0: 
+		return((num)/(9.81*996.25))
+		#return((num))
+
 	else:
 		
-		return(num)
+		return(num/1000)
 #load image resourses 
 if True:
 	img = Image.open("FLOAT_RES/descend.png")
@@ -160,12 +163,12 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		points = []
 		global newdata
 		def newdata():
+			ts.clear()
+			ds.clear()
+
 			log=open("log.txt","w")
 			log.write("")
 			log.close()
-			log=open("log.txt","a")
-			ts.clear()
-			ds.clear()
 			if useolddataformat == 1:
 				while True:
 					log=open("log.txt","a")
@@ -180,16 +183,19 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 							ts.append(float(chrs.replace("t","")))
 			else:
 				while True:
-					chrs = str(ser.readline().decode(encoding="utf-8")).replace('\n',"").replace("\r","")
+					chrs = str(ser.readline().decode(encoding="utf-8")).replace('*',"").replace('\n',"").replace("\r","")
+					log=open("log.txt","a")
 					print(chrs)
-					log.write(chrs)
+					log.write(chrs+"\n")
 					log.close()
+					chrssplit = re.sub(" +"," ",chrs).split(" ")
 					#ds.append(float(chrs.replace("d","")))
 					if "end" in chrs:
 						break
-					elif " " in chrs:
-						ts.append(float(chrs.split("  ")[2].replace("t","")))
-						ds.append(float(chrs.split("  ")[1].replace("d","")))
+					elif " " in chrs and len(chrssplit) == 3:
+						if len(re.findall("[1234567890]",chrssplit[1])) != 0 and len(re.findall("[1234567890]",chrssplit[2])) != 0:
+							ts.append(float(chrssplit[1].replace("t","")))
+							ds.append(float(chrssplit[2].replace("d","")))
 			points.clear()
 			self.points.clear()
 			for p in range(len(ts)):
@@ -245,13 +251,16 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 						self.store.append((ts[p],ds[p]))
 					points.clear()
 					points.extend(CatmullRomChain(self.store,0,ds))
+		"""for I in range(100):
+			pyxel.line(int((I)*val(1,low(ts),high(ts),70,1000)),550,int((I)*val(1,low(ts),high(ts),70,1000)),20,7)
+			"""
 		for i in range(1000-70):
-			if ((val(i+70,70,1000,(low(ts)),(high(ts))))) % 5 < (0.07):
+			if ((val(i+70,70,1000,(low(ts)),(high(ts))))) % 5 < val(high(ts)-low(ts),10,900,0.01,0.9):
 				pyxel.line(i+70,550,i+70,20,7)
 				if not ((val(i+70,70,1000,conv(low(ts),0),conv(high(ts),0))) == conv(low(ts),0) or (val(i+70,70,1000,conv(low(ts),0),conv(high(ts),0))) ==conv(high(ts),0)):
-					writer.draw(i+70, 570, str(int(val(i+70,70,1000,conv(low(ts),0),conv(high(ts),0)))), 9+so, 7)
+					writer.draw(i+70, 570, str(int((val(i+70,70,1000,(low(ts)),(high(ts)))))), 9+so, 7)
 		for i in range(550):
-			if (val(i,20,550,conv(low(ds),0),conv(high(ds),0))) % 0.5 < 0.006:
+			if (val(i,20,550,conv(low(ds),0),conv(high(ds),0))) % 0.5 < val(high(ds)-low(ds),0.1,100,0.0001,0.15):
 				pyxel.line(1000,i,70,i,7)
 				if not ((val(i,20,550,low(ds),high(ds))) < low(ds)+0.1 or (val(i,20,550,low(ds),high(ds))) > high(ds)-0.1):
 					writer.draw(25, i, str(int((val(i,20,550,conv(low((ds)),self.usepr),conv(high(ds),self.usepr)))*10)/10), 8+so, 7)
@@ -259,7 +268,6 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		#pyxel.line(800,0,800,600,8)
 		
 		tline((1002,0),(1002,600),2,8)
-		tline((70,0),(70,600),2,8)
 		tline((70,0),(70,600),2,8)
 		tline((1200,552),(25,552),2,5)
 		tline((22,0),(22,600),1,8)
@@ -319,7 +327,7 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			writer.draw(8,(i*20)+5,str(i+1),9+so,7)
 			pyxel.line(0,(i*20)+20,20,(i*20)+20,7)
 		#top line
-		writer.draw(70,0,"Rays Float 2025",13+so,11)
+		writer.draw(70,0,"Rays Float 2025"+"      "+str(len(self.points)),13+so,11)
 		pyxel.rect(400,0,60,20,14)
 		pyxel.rect(400+(self.usepr*30),0,30,20,13)
 		writer.draw(400+(self.usepr*30)+10+(self.usepr*-9),4,("M","KPA")[self.usepr],10+so,7)
@@ -350,7 +358,7 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		if pyxel.btn(pyxel.MOUSE_BUTTON_LEFT) and clamp(pyxel.mouse_x,23,1000) == pyxel.mouse_x and 19<pyxel.mouse_y:
 			pyxel.line(pyxel.mouse_x,0,pyxel.mouse_x,600,5)
 			pyxel.line(0,pyxel.mouse_y,1000,pyxel.mouse_y,8)
-			writer.draw(pyxel.mouse_x+10,pyxel.mouse_y,str(int(conv(val(pyxel.mouse_y,20,550,low(ds),high(ds)),self.usepr)*100)/100)+("m","kpa")[self.usepr],11+so,8)		 
+			writer.draw(pyxel.mouse_x+10,pyxel.mouse_y,str(int(conv(val(pyxel.mouse_y,20,550,low(ds),high(ds)),self.usepr)*10)/10)+("m","kpa")[self.usepr],11+so,8)		 
 			writer.draw(pyxel.mouse_x+10,pyxel.mouse_y+15,str(int(val(pyxel.mouse_x,70,1000,low(ts),high(ts))*1)/1)+"s",11+so,5)
 		pyxel.circ(1135,576,20,15)
 		pyxel.circ(1178,576,20,17)
