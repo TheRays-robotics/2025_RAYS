@@ -10,6 +10,7 @@ from PIL import Image, ImageFile
 readFromsSerial = 1
 useolddataformat = 0
 xbee = 1
+windows = 0
 so=6
 tnum = 18
 starttime = time()
@@ -136,7 +137,7 @@ if readFromsSerial == 0:
 	ds = scanr("d")
 
 else:
-	ser = serial.Serial(('/dev/ttyACM0','/dev/ttyUSB0')[xbee], 9600)
+	ser = serial.Serial((('/dev/ttyACM0','/dev/ttyUSB0'),('THIS WAS NOT PLANNED DAINAIL','COM8'))[windows][xbee], 115200)
 	print("connected")
 
 writer = puf.Writer("IniSans-VGvnZ.otf")
@@ -393,4 +394,4 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				pyxel.cls(0)
 				writer.draw(300,300,"Collecting serial data...",20+so,9)
 				self.nextFrameIsFreeze=1
-App()
+App()#5:55:39
