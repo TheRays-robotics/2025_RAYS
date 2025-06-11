@@ -3,7 +3,7 @@ from math import *
 from colorutils import *
 from PIL import Image
 import PyxelUniversalFont as puf
-data = [0,1,1,1,2,3,3,3,4,5]
+data = [0,1,2,2,2,3,3,4,4,4]
 map0 = Image.open("CARP_RES/map.png")
 num = 0
 pain=["ffffff","a3ff9f","3faefb","000000","888888"]
