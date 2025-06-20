@@ -1,1 +1,1 @@
-  [![HitCount](https://hits.dwyl.com/shrimpLiquid/2025_RAYS_FLOAT.svg?style=flat-square)](http://hits.dwyl.com/shrimpLiquid/2025_RAYS_FLOAT)
+there would be more code on this repo but someone(not to name names) is blind to their duty as a repectfull human being.
