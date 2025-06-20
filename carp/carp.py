@@ -6,7 +6,7 @@ import PyxelUniversalFont as puf
 
 isonwindows = 0
 
-data = [0,1,2,2,2,3,3,4,4,4]
+data = [1,1,1,2,2,2,3,4,4,5]
 map0 = Image.open(("CARP_RES/map.png","C:/Users/damyr/Downloads/carp/map.png")[isonwindows])
 num = 0
 pain=["ffffff","a3ff9f","3faefb","000000","888888"]
@@ -52,7 +52,7 @@ class App:
 					pyxel.pset(x,y,bc)
 		if pyxel.frame_count < 1 :
 			drawMap(map0)
-			
+			drawoverlay(data[0])
 		#pyxel.mouse(True)
 		pyxel.rect(0,20,100,40,0)
 		writer.draw(0,20,str(2016+self.num),40,3)
