@@ -5,9 +5,9 @@ from PIL import Image
 import PyxelUniversalFont as puf
 
 isonwindows = 0
-
-data = [1,1,1,2,2,2,3,4,4,5]
-map0 = Image.open(("CARP_RES/map.png","C:/Users/damyr/Downloads/carp/map.png")[isonwindows])
+user = "USER"
+data = [0,1,2,2,2,2,3,4,5,5]
+map0 = Image.open(("CARP_RES/map.png","C:/Users/"+user+"/Downloads/carp/map.png")[isonwindows])
 num = 0
 pain=["ffffff","a3ff9f","3faefb","000000","888888"]
 pain2 = []
