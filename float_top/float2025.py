@@ -7,12 +7,12 @@ from time import sleep,time
 from math import dist,atan2,degrees,radians,sin,cos,dist
 import PyxelUniversalFont as puf
 from PIL import Image, ImageFile
-readFromsSerial = 1
-useolddataformat = 0
+readFromsSerial = 0
+useolddataformat = (readFromsSerial+1)%2
 xbee = 1
 windows = 0
 so=6
-tnum = 18
+tnum = "RN06"
 starttime = time()
 def lerp(pos1,pos2, t):
 	x1 = pos1[0]
@@ -92,12 +92,12 @@ def low(list):
 def conv(num,ç):
 
 	if ç == 0: 
-		return((num)/(9.81*996.25))
+		return(num)
 		#return((num))
 
 	else:
 		
-		return(num/1000)
+		return(num*(9.81*996.25))
 #load image resourses 
 if True:
 	img = Image.open("FLOAT_RES/descend.png")
@@ -137,13 +137,13 @@ if readFromsSerial == 0:
 	ds = scanr("d")
 
 else:
-	ser = serial.Serial((('/dev/ttyACM0','/dev/ttyUSB0'),('THIS WAS NOT PLANNED DAINAIL','COM8'))[windows][xbee], 115200)
+	ser = serial.Serial((('/dev/ttyACM0','/dev/ttyUSB0'),('D:','COM8'))[windows][xbee], 115200)
 	print("connected")
 
 writer = puf.Writer("IniSans-VGvnZ.otf")
-class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	def __init__(self):
-		pyxel.init(1200, 600,title="The Rays Float")
+		pyxel.init(1200, 600,title="The Rays Float",capture_scale=1)
 		tc = pyxel.colors.to_list()
 		tc.append(0x008cff)
 		tc.append(0x36ca14)
@@ -161,7 +161,6 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		self.starttime = starttime
 		self.nextFrameIsFreeze=0
 		self.prof = []
-
 		points = []
 		global newdata
 		def newdata():
@@ -197,8 +196,9 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 					elif " " in chrs and len(chrssplit) == 3:
 						if len(re.findall("[1234567890]",chrssplit[1])) != 0 and len(re.findall("[1234567890]",chrssplit[2])) != 0:
 							if not ("R" in chrssplit[1] or "R" in chrssplit[2]):
-								ts.append(float(chrssplit[1].replace("t","")))
-								ds.append(float(chrssplit[2].replace("d","")))
+								if not float(chrssplit[1].replace("t","")) in ts:
+									ts.append(float(chrssplit[1].replace("t","")))
+									ds.append(float(chrssplit[2].replace("d","")))
 			points.clear()
 			self.points.clear()
 			for p in range(len(ts)):
@@ -267,7 +267,7 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				pyxel.line(1000,i,70,i,7)
 				if not ((val(i,20,550,low(ds),high(ds))) < low(ds)+0.1 or (val(i,20,550,low(ds),high(ds))) > high(ds)-0.1):
 					writer.draw(25, i, str(int((val(i,20,550,conv(low((ds)),self.usepr),conv(high(ds),self.usepr)))*10)/10), 8+so, 7)
-"""
+		"""
 		#pyxel.line(800,0,800,600,8)
 		
 		tline((1002,0),(1002,600),2,8)
@@ -300,7 +300,10 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		for t in ds:
 			self.ß =self.ß+1 
 			if self.ß < 44: 
-				writer.draw(1075,50+(self.ß*11),str(conv(t,self.usepr)).split(".")[0]+"."+str(conv(t,self.usepr)).split(r".")[1][-1]+(("m","kpa")[self.usepr]),6+so,3)
+				if "." in str(conv(t,self.usepr)):
+					writer.draw(1075,50+(self.ß*11),str(conv(t,self.usepr)).split(".")[0]+"."+str(conv(t,self.usepr)).split(".")[1][-1]+(("m","kpa")[self.usepr]),6+so,3)
+				else:
+					writer.draw(1075,50+(self.ß*11),str(conv(t,self.usepr))+(("m","kpa")[self.usepr]),6+so,3)
 			elif self.ß == 44:
 				writer.draw(1006,50+(self.ß*11),"...",6+so,3)
 		#left buttons
@@ -336,7 +339,7 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		writer.draw(400+(self.usepr*30)+10+(self.usepr*-9),4,("M","KPA")[self.usepr],10+so,7)
 		pyxel.rect(600,0,60,20,14)
 		pyxel.rect(600+(self.issmooth*30),0,30,20,13)
-		writer.draw(600+(self.issmooth*30)+10+(self.issmooth*-5),4,("L","CR")[self.issmooth],10+so,7)
+		writer.draw(600+(self.issmooth*30)+10+(self.issmooth*-5),4,("L","SP")[self.issmooth],10+so,7)
 		if pyxel.mouse_y < 20:
 			if pyxel.btn(pyxel.MOUSE_BUTTON_LEFT) and pyxel.mouse_x == clamp(pyxel.mouse_x,400+(self.usepr*30),430+(self.usepr*30)):
 				self.usepr = (self.usepr+1)%2
@@ -394,4 +397,4 @@ class App:#shrimp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				pyxel.cls(0)
 				writer.draw(300,300,"Collecting serial data...",20+so,9)
 				self.nextFrameIsFreeze=1
-App()#5:55:39
+App()
